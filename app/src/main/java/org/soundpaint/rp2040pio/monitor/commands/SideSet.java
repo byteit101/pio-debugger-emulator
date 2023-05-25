@@ -148,7 +148,7 @@ public class SideSet extends Command
                    pioNum, smNum, nettoCount, base, opt, pinDirs);
   }
 
-  private void setSideSetCount(final int pioNum, final int smNum,
+  void setSideSetCount(final int pioNum, final int smNum,
                                final SDK sdk, final int nettoCount)
     throws IOException
   {
@@ -188,7 +188,7 @@ public class SideSet extends Command
                    pioNum, smNum, base);
   }
 
-  private void setSideSetOpt(final int pioNum, final int smNum,
+  void setSideSetOpt(final int pioNum, final int smNum,
                              final SDK sdk, final boolean opt)
     throws IOException
   {
@@ -242,7 +242,7 @@ public class SideSet extends Command
     }
   }
 
-  private void setSideSetPinDirs(final int pioNum, final int smNum,
+  void setSideSetPinDirs(final int pioNum, final int smNum,
                                  final SDK sdk, final boolean pinDirs)
     throws IOException
   {

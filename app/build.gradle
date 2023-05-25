@@ -21,7 +21,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
 
     // This dependency is used by the application.
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -36,11 +36,30 @@ application {
     mainClass = 'org.soundpaint.rp2040pio.SingleApp'
 }
 
+// uber jar, output in app/build/libs/app.jar
 jar {
   manifest {
     attributes 'Main-Class': application.mainClass
   }
+  
+  // include all dependencies
+  from {
+  	configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  }
 }
+
+/*task serverJar(type: Jar) {
+
+  manifest {
+    attributes 'Main-Class': 'org.soundpaint.rp2040pio.EmulationServer'
+  }  
+}
+
+task monitorJar(type: Jar) {
+  manifest {
+    attributes 'Main-Class': 'org.soundpaint.rp2040pio.monitor.Monitor'
+  }
+}*/
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.

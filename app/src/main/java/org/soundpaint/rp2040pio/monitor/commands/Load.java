@@ -146,7 +146,7 @@ public class Load extends Command
     }
   }
 
-  private boolean loadHexDump(final int pioNum,
+  boolean loadHexDump(final int pioNum,
                               final BufferedReader reader,
                               final String hexDumpId,
                               final Integer address)

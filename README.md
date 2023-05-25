@@ -146,6 +146,15 @@ internal state of the PIO in a graphical and more vivid manner.
 
 * Also add tooltips with descriptive / explanatory text for all
   warnings, where appropriate.
+  
+## byteit101 changes
+
+ * better build system. Move to gradle so it can be imported in ide's nicely. Doc build is broken
+ * Build with: `./gradlew jar`
+ * Single jar to simplify launching
+ * Launch with: `./app/build/libs/app.jar <toolname>`
+ * new Multi-observer gui (toolname = "gui")
+ * new `assemble` instruction in the monitor
 
 <!-- References -->
 

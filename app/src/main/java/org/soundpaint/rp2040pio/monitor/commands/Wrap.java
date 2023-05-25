@@ -134,7 +134,7 @@ public class Wrap extends Command
                    pioNum, smNum, wrap, wrapTarget);
   }
 
-  private void setWrap(final int pioNum, final int smNum,
+  void setWrap(final int pioNum, final int smNum,
                        final SDK sdk, final int wrap)
     throws IOException
   {
@@ -146,7 +146,7 @@ public class Wrap extends Command
     console.printf("(pio%d:sm%d) set wrap=%d%n", pioNum, smNum, wrap);
   }
 
-  private void setWrapTarget(final int pioNum, final int smNum,
+  void setWrapTarget(final int pioNum, final int smNum,
                              final SDK sdk, final int wrapTarget)
     throws IOException
   {

@@ -24,11 +24,23 @@
  */
 package org.soundpaint.rp2040pio.monitor.commands;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.PrintStream;
+import java.io.StringReader;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.soundpaint.rp2040pio.CmdOptions;
 import org.soundpaint.rp2040pio.Constants;
 import org.soundpaint.rp2040pio.Decoder;
+import org.soundpaint.rp2040pio.IOUtils;
 import org.soundpaint.rp2040pio.PIOEmuRegisters;
 import org.soundpaint.rp2040pio.PIORegisters;
 import org.soundpaint.rp2040pio.monitor.Command;
@@ -48,7 +60,12 @@ public class Assemble extends Command
   private static final String notes =
     "Note that this command assumes that pioasm is installed%n" +
     "on your PATH and simply shells out to it for now.%n" +
-    "It is possible to specify other locations for pioasm.";
+    "It is possible to specify other locations for pioasm.%\n" +
+    "%n" + 
+    "If the \"-l\" load option is given, then after assembly,%n" +
+    "it it loaded into pio 0, along with wrap and side set %n"+
+    "commands for sm 0. If you need further control, manually%n" +
+    "load and configure the file, or make a PR with code improvements.";
 
   private static final CmdOptions.StringOptionDeclaration optInput =
     CmdOptions.createStringOption("PATH", true, 'i', "input", null,
@@ -59,6 +76,9 @@ public class Assemble extends Command
   private static final CmdOptions.StringOptionDeclaration optTool =
     CmdOptions.createStringOption("PATH", false, 't', "tool", null,
                                   "path to pioasm tool, if not on PATH");
+  private static final CmdOptions.BooleanOptionDeclaration optLoad =
+    CmdOptions.createBooleanOption(false, 'l', "load", false,
+                                  "If the .pioasm file should be loaded");
 
   private final SDK sdk;
 
@@ -66,7 +86,7 @@ public class Assemble extends Command
   {
     super(console, fullName, singleLineDescription, notes,
           new CmdOptions.OptionDeclaration<?>[]
-          { optInput, optOutput, optTool });
+          { optInput, optOutput, optTool, optLoad });
     if (sdk == null) {
       throw new NullPointerException("sdk");
     }
@@ -104,14 +124,63 @@ public class Assemble extends Command
 		else
 			output = input + ".hex";
 	}
-	sdk.getConsole().println("Assembling PIO code to " + output);
-    Process p = Runtime.getRuntime().exec(new String[] {pioasm, "-o", "hex", input, output});
-    try {
-		int exitVal = p.waitFor();
-		sdk.getConsole().println("pioasm exited with code " + exitVal);
-		return exitVal == 0;
-	} catch (InterruptedException e) {
-		return false;
+	if (!options.getValue(optLoad))
+	{
+		sdk.getConsole().println("Assembling PIO code to " + output);
+	    Process p = Runtime.getRuntime().exec(new String[] {pioasm, "-o", "hex", input, output});
+	    try {
+			int exitVal = p.waitFor();
+			sdk.getConsole().println("pioasm exited with code " + exitVal);
+			return exitVal == 0;
+		} catch (InterruptedException e) {
+			return false;
+		}
+	}
+	else
+	{
+		var jsonOutput = File.createTempFile("rp2040pio", ".json");
+		jsonOutput.deleteOnExit();
+	    Process p = Runtime.getRuntime().exec(new String[] {pioasm, "-o", "json", input, jsonOutput.getAbsolutePath()});
+	    try {
+			int exitVal = p.waitFor();
+			sdk.getConsole().println("pioasm exited with code " + exitVal);
+			if (exitVal != 0)
+				return false;
+		} catch (InterruptedException e) {
+			return false;
+		}
+	    var parser = new JSONParser();
+		try(var reader = new FileReader(jsonOutput))
+		{
+			var data = (JSONObject) parser.parse(reader);
+
+			if (data.size() != 1)
+			{
+				sdk.getConsole().println("pioasm files must have exactly one program when being loaded. Consider implementing multiple programs in this code.");
+				return false;
+			}
+			// load it. { "progr_name":{"instructions:[{"hex": "...."}]}}
+			var program = (JSONObject) data.values().toArray()[0];
+			var program_name = data.keySet().toArray()[0].toString();
+			String hex = ((Stream<Object>)((JSONArray)program.get("instructions")).stream()).map(x -> ((JSONObject)x).get("hex").toString()).collect(Collectors.joining("\n"));
+			if (!new Load(sdk.getConsole(), sdk).loadHexDump(0, new LineNumberReader(new StringReader(hex)), program_name, null))
+				return false;
+			// code loaded, now 			
+			// Use the JSON output to get set/side set options
+			var wrap = new Wrap(sdk.getConsole(), sdk);
+			wrap.setWrap(0, 0, sdk, (int)(Integer)program.get("wrap"));
+			wrap.setWrapTarget(0, 0, sdk, (int)(Integer)program.get("wrap_target"));
+			var sideset_obj = (JSONObject)program.get("sideset");
+			var sideset = new SideSet(sdk.getConsole(), sdk);
+			sideset.setSideSetCount(0, 0, sdk, (int)(Integer)sideset_obj.get("size"));
+			sideset.setSideSetOpt(0, 0, sdk, (Boolean)sideset_obj.get("optional"));
+			sideset.setSideSetPinDirs(0, 0, sdk, (Boolean)sideset_obj.get("pindirs"));
+			
+			return true;
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
   }
 }
