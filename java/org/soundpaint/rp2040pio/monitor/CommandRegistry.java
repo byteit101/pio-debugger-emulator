@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.soundpaint.rp2040pio.CmdOptions;
 import org.soundpaint.rp2040pio.ParseException;
+import org.soundpaint.rp2040pio.monitor.commands.Assemble;
 import org.soundpaint.rp2040pio.monitor.commands.BreakPoints;
 import org.soundpaint.rp2040pio.monitor.commands.Clear;
 import org.soundpaint.rp2040pio.monitor.commands.Clock;
@@ -99,6 +100,7 @@ public class CommandRegistry implements Iterable<Command>
                                final String appFullName)
   {
     final Quit quit;
+    add(new Assemble(console, sdk));
     add(new BreakPoints(console, sdk));
     add(new Clear(console));
     add(new Clock(console, sdk));
