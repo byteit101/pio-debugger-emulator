@@ -13,6 +13,7 @@ import org.soundpaint.rp2040pio.observer.code.CodeObserver;
 import org.soundpaint.rp2040pio.observer.diagram.Diagram;
 import org.soundpaint.rp2040pio.observer.fifo.FifoObserver;
 import org.soundpaint.rp2040pio.observer.gpio.GPIOObserver;
+import org.soundpaint.rp2040pio.observer.multigui.MultiGuiObserver;
 
 public class SingleApp {
 
@@ -26,6 +27,7 @@ public class SingleApp {
         map.put("diagram", Diagram.class);
         map.put("doctool", RegistersDocsBuilder.class);
         map.put("observer", Observer.class);
+        map.put("gui", MultiGuiObserver.class);
 
         if (args.length < 1)
         {
