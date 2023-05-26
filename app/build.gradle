@@ -42,6 +42,8 @@ jar {
     attributes 'Main-Class': application.mainClass
   }
   
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  
   // include all dependencies
   from {
   	configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }

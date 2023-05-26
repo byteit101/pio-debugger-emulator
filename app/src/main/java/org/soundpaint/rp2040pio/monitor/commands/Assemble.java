@@ -60,7 +60,7 @@ public class Assemble extends Command
   private static final String notes =
     "Note that this command assumes that pioasm is installed%n" +
     "on your PATH and simply shells out to it for now.%n" +
-    "It is possible to specify other locations for pioasm.%\n" +
+    "It is possible to specify other locations for pioasm.%n" +
     "%n" + 
     "If the \"-l\" load option is given, then after assembly,%n" +
     "it it loaded into pio 0, along with wrap and side set %n"+
@@ -68,7 +68,7 @@ public class Assemble extends Command
     "load and configure the file, or make a PR with code improvements.";
 
   private static final CmdOptions.StringOptionDeclaration optInput =
-    CmdOptions.createStringOption("PATH", true, 'i', "input", null,
+    CmdOptions.createStringOption("PATH", false, 'i', "input", null,
                                   "path of .pioasm source file to load");
   private static final CmdOptions.StringOptionDeclaration optOutput =
     CmdOptions.createStringOption("PATH", false, 'o', "output", null,
@@ -98,9 +98,11 @@ public class Assemble extends Command
   protected void checkValidity(final CmdOptions options)
     throws CmdOptions.ParseException
   {
-    if (options.getValue(optInput) == null) {
-        throw new CmdOptions.
-          ParseException("input file \"-i\" must be specified");
+    if (options.getValue(optHelp) != CmdOptions.Flag.ON) {
+	    if (options.getValue(optInput) == null) {
+	        throw new CmdOptions.
+	          ParseException("input file \"-i\" must be specified");
+	    }
     }
   }
 
