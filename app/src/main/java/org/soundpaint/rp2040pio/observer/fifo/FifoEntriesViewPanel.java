@@ -46,6 +46,7 @@ import org.soundpaint.rp2040pio.PIO;
 import org.soundpaint.rp2040pio.PIOEmuRegisters;
 import org.soundpaint.rp2040pio.PIORegisters;
 import org.soundpaint.rp2040pio.SwingUtils;
+import org.soundpaint.rp2040pio.monitor.commands.Fifo;
 import org.soundpaint.rp2040pio.sdk.PIOSDK;
 import org.soundpaint.rp2040pio.sdk.SDK;
 
@@ -290,10 +291,19 @@ public class FifoEntriesViewPanel extends JPanel
     final Box hBox = new Box(BoxLayout.LINE_AXIS);
     final JLabel lbAuto = new JLabel("Auto " + actionName);
     lbAuto.setLabelFor(cbAuto);
-    cbAuto.setEnabled(false);
+    cbAuto.setEnabled(true);
     hBox.add(cbAuto);
     hBox.add(lbAuto);
     hBox.add(Box.createHorizontalGlue());
+
+    cbAuto.addActionListener((event) -> {
+    		try {
+				new Fifo(console, sdk).setAuto(pioNum, smNum, (event.getSource() == cbAutoPull) ? Fifo.Type.TX : Fifo.Type.RX, cbAuto.isSelected());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    		smChanged(pioNum, smNum);
+    });
     return hBox;
   }
 

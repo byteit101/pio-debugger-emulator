@@ -35,7 +35,7 @@ import org.soundpaint.rp2040pio.observer.GUIObserver;
 public class FifoObserver extends GUIObserver
 {
   private static final long serialVersionUID = 5938495055310591092L;
-  private static final String APP_TITLE = "FIFO Observer";
+  public static final String APP_TITLE = "FIFO Observer";
   private static final String APP_FULL_NAME =
     "Emulation FIFO Observer Version 0.1";
 

@@ -40,7 +40,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.soundpaint.rp2040pio.Constants;
 import org.soundpaint.rp2040pio.observer.GUIObserver;
+import org.soundpaint.rp2040pio.observer.code.CodeObserver;
 import org.soundpaint.rp2040pio.observer.code.CodeViewPanel;
+import org.soundpaint.rp2040pio.observer.fifo.FifoObserver;
 import org.soundpaint.rp2040pio.observer.fifo.FifoViewPanel;
 import org.soundpaint.rp2040pio.observer.gpio.GPIOViewPanel;
 
@@ -71,21 +73,15 @@ private FifoViewPanel fifoViewPanel;
   private Component makeLayout(final PrintStream console) throws IOException
   {
 	  var contentPane = new JPanel();
-		//contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-		//setContentPane(contentPane);
 		contentPane.setLayout(new GridLayout(0, 2, 6, 6));
 		
-		//panel.setLayout(new GridLayout(0, 1, 6, 6));
-		
-		fifoViewPanel = new FifoViewPanel(console, getSDK(), APP_TITLE);
+		fifoViewPanel = new FifoViewPanel(console, getSDK(), FifoObserver.APP_TITLE);
 		
 		gpioViewPanel = new GPIOViewPanel(console, getSDK());
 
 		var panel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, fifoViewPanel, gpioViewPanel);
-		//contentPane.add(panel);
 		
-		codeViewPanel = new CodeViewPanel(console, getSDK(), APP_TITLE);
+		codeViewPanel = new CodeViewPanel(console, getSDK(), CodeObserver.APP_TITLE);
 		var panel2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, panel, codeViewPanel);
 		
 		return panel2;

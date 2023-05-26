@@ -35,7 +35,7 @@ import org.soundpaint.rp2040pio.observer.GUIObserver;
 public class CodeObserver extends GUIObserver
 {
   private static final long serialVersionUID = -8266192991979578046L;
-  private static final String APP_TITLE = "Code Observer";
+  public static final String APP_TITLE = "Code Observer";
   private static final String APP_FULL_NAME =
     "Emulation Code Observer Version 0.1";
 

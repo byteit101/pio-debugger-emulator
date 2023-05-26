@@ -135,7 +135,7 @@ public class Fifo extends Command
     CmdOptions.createFlagOption(false, 'r', "rx", CmdOptions.Flag.OFF,
                                 "apply modification on RX FIFO");
 
-  private enum Type
+  public enum Type
   {
     RX, TX;
   };
@@ -435,7 +435,7 @@ public class Fifo extends Command
                    shiftDirectionAsString(right));
   }
 
-  private void setAuto(final int pioNum, final int smNum, final Type type,
+  public void setAuto(final int pioNum, final int smNum, final Type type,
                        final boolean auto)
     throws IOException
   {
