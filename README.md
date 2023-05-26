@@ -154,7 +154,9 @@ internal state of the PIO in a graphical and more vivid manner.
  * Single jar to simplify launching
  * Launch with: `./app/build/libs/app.jar <toolname>`
  * new Multi-observer gui (toolname = "gui")
- * new `assemble` instruction in the monitor
+ * new `assemble` instruction in the monitor that can replace load+wrap+sideset
+ * Monitor CLI now has history & tab completion (jline3/readline-like)
+ * GPIO can be toggled from GUI
 
 <!-- References -->
 
