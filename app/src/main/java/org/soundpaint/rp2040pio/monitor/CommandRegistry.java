@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -131,9 +132,9 @@ public class CommandRegistry implements Iterable<Command>
     return quit;
   }
   
-  public Set<String> getAllCommands()
+  public Collection<String> getAllCommands()
   {
-	  return token2commands.keySet();
+	  return commands.stream().map(Command::getFullName).toList();
   }
 
   private void add(final Command command)
