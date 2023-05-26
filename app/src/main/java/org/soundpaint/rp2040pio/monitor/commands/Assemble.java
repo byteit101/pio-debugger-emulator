@@ -165,16 +165,19 @@ public class Assemble extends Command
 			var program = (JSONObject) data.values().toArray()[0];
 			var program_name = data.keySet().toArray()[0].toString();
 			String hex = ((Stream<Object>)((JSONArray)program.get("instructions")).stream()).map(x -> ((JSONObject)x).get("hex").toString()).collect(Collectors.joining("\n"));
+			
+			// TODO: use ProgramParser supported directives?
+			hex = "#.program " + program_name + "\n\n" + hex;
 			if (!new Load(sdk.getConsole(), sdk).loadHexDump(0, new LineNumberReader(new StringReader(hex)), program_name, null))
 				return false;
 			// code loaded, now 			
 			// Use the JSON output to get set/side set options
 			var wrap = new Wrap(sdk.getConsole(), sdk);
-			wrap.setWrap(0, 0, sdk, (int)(Integer)program.get("wrap"));
-			wrap.setWrapTarget(0, 0, sdk, (int)(Integer)program.get("wrap_target"));
+			wrap.setWrap(0, 0, sdk, (int)(long)(Long)program.get("wrap"));
+			wrap.setWrapTarget(0, 0, sdk, (int)(long)(Long)program.get("wrap_target"));
 			var sideset_obj = (JSONObject)program.get("sideset");
 			var sideset = new SideSet(sdk.getConsole(), sdk);
-			sideset.setSideSetCount(0, 0, sdk, (int)(Integer)sideset_obj.get("size"));
+			sideset.setSideSetCount(0, 0, sdk, (int)(long)(Long)sideset_obj.get("size"));
 			sideset.setSideSetOpt(0, 0, sdk, (Boolean)sideset_obj.get("optional"));
 			sideset.setSideSetPinDirs(0, 0, sdk, (Boolean)sideset_obj.get("pindirs"));
 			
