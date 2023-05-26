@@ -24,6 +24,8 @@
  */
 package org.soundpaint.rp2040pio.observer.gpio;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Objects;
@@ -35,8 +37,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.soundpaint.rp2040pio.Bit;
 import org.soundpaint.rp2040pio.Constants;
+import org.soundpaint.rp2040pio.Constants.GPIO_Function;
 import org.soundpaint.rp2040pio.Direction;
 import org.soundpaint.rp2040pio.GPIOIOBank0Registers;
+import org.soundpaint.rp2040pio.PicoEmuRegisters;
+import org.soundpaint.rp2040pio.PinState;
 import org.soundpaint.rp2040pio.sdk.GPIOSDK;
 import org.soundpaint.rp2040pio.sdk.SDK;
 
@@ -72,6 +77,31 @@ public class GPIOPanel extends JPanel
     final Box ledBox = new Box(BoxLayout.LINE_AXIS);
     ledBox.add(Box.createHorizontalGlue());
     ledBox.add(lbStatus = new JLabel(GPIOViewPanel.ledInLow));
+    lbStatus.addMouseListener(new MouseListener() {
+		
+		@Override public void mouseReleased(MouseEvent e) {}
+		@Override public void mousePressed(MouseEvent e) { }
+		@Override public void mouseExited(MouseEvent e) { }
+		@Override public void mouseEntered(MouseEvent e) { }
+		@Override
+		public void mouseClicked(MouseEvent e) {
+
+		      try {
+			final GPIOSDK gpioSdk = sdk.getGPIOSDK();
+		    final PinState[] pinStates = gpioSdk.getPinStates(GPIOSDK.Override.AFTER);
+
+		      final int address =
+		        PicoEmuRegisters.getAddress(PicoEmuRegisters.Regs.GPIO_PADIN);
+		      final int mask = 0x1 << gpioNum;
+		    	if (pinStates[gpioNum].getLevel() == Bit.LOW)
+		    		sdk.hwSetBits(address, mask);
+		    	else 
+		    		sdk.hwClearBits(address, mask);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+	});
     ledBox.add(Box.createHorizontalGlue());
     add(ledBox);
     add(Box.createVerticalGlue());
