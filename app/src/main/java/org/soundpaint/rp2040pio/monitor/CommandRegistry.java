@@ -130,6 +130,11 @@ public class CommandRegistry implements Iterable<Command>
     add(new Write(console, sdk));
     return quit;
   }
+  
+  public Set<String> getAllCommands()
+  {
+	  return token2commands.keySet();
+  }
 
   private void add(final Command command)
   {

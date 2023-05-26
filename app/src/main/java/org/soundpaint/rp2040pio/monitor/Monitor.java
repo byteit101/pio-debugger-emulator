@@ -29,8 +29,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
+
+import org.jline.builtins.SyntaxHighlighter;
+import org.jline.reader.Completer;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.Highlighter;
+import org.jline.reader.History;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
+import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.reader.impl.history.DefaultHistory;
+import org.jline.terminal.Attributes;
+import org.jline.terminal.Attributes.ControlChar;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 import org.soundpaint.rp2040pio.AddressSpace;
 import org.soundpaint.rp2040pio.Constants;
 import org.soundpaint.rp2040pio.CmdOptions;
@@ -192,25 +209,48 @@ public class Monitor
       } else {
         scriptIn = null;
       }
+
+      if (scriptIn == null) {
+      	// interactive! use nice jline stuff
+    	 var highlighter = new SimpleHighlighter();
+    	 highlighter.setKeywords(commands.getAllCommands());
+      	Terminal terminal = TerminalBuilder.builder()
+      	.nativeSignals(true)
+      	.signalHandler(Terminal.SignalHandler.SIG_IGN)
+      	.build();
+
+      	Attributes termAttribs = terminal.getAttributes();
+      	termAttribs.setControlChar(ControlChar.VEOF, 0);
+      	termAttribs.setControlChar(ControlChar.VINTR, 4);
+      	terminal.setAttributes(termAttribs);
+      	
+      	var reader = LineReaderBuilder.builder()
+      			.terminal(terminal)
+      			.completer(new StringsCompleter(commands.getAllCommands()))
+      			.highlighter(highlighter)
+                  .variable(LineReader.HISTORY_FILE, Paths.get(System.getProperty("user.home"), ".rp2040pio_history"))
+                  .build();
+          return session(() -> reader.readLine("> "), false, false);
+      }
+      else
+      	return session(() -> {
+      		console.print("script> ");
+      		return scriptIn.readLine();
+      	}, false, true);
+      
     } catch (final IOException e) {
       console.println(e.getMessage());
       return -1;
     }
-    return
-      (scriptIn != null) ?
-      session(scriptIn, false, true, "script> ") :
-      session(in, false, localEcho, "> ");
   }
 
-  private int session(final BufferedReader in,
+  private int session(final IOSupplier<String> in,
                       final boolean dryRun,
-                      final boolean localEcho,
-                      final String prompt) {
+                      final boolean localEcho) {
     try {
       while (true) {
-        console.print(prompt);
         try {
-          final String line = in.readLine();
+          final String line = in.get();
           if (line == null) break;
           if (localEcho) console.println(line);
           if (commands.parseAndExecute(line, dryRun)) break;
@@ -220,6 +260,9 @@ public class Monitor
             console.printf(Command.panicNotes);
             console.println();
           }
+        } catch (final EndOfFileException | UserInterruptException e) {
+        	// done, ctrl-d/ctrl-c
+        	break;
         }
       }
       console.println("bye");
@@ -253,6 +296,11 @@ public class Monitor
   {
     final int exitCode = main(argv, System.in, System.out, false);
     System.exit(exitCode);
+  }
+  
+  @FunctionalInterface
+  public static interface IOSupplier<T> {
+    public T get() throws IOException;
   }
 }
 

@@ -22,6 +22,10 @@ dependencies {
 
     // This dependency is used by the application.
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    implementation 'org.jline:jline-reader:3.23.0'
+    implementation 'org.jline:jline-builtins:3.23.0'
+    implementation 'org.jline:jline-terminal:3.23.0'
+    implementation 'org.jline:jline-terminal-jansi:3.23.0'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
