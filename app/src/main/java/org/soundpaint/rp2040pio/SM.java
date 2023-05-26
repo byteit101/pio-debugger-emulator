@@ -295,6 +295,11 @@ public class SM implements Constants
       return osrShiftCount >=
         (regSHIFTCTRL_PULL_THRESH != 0 ? regSHIFTCTRL_PULL_THRESH : 32);
     }
+    
+    public boolean isOsrFull()
+    {
+    	return osrShiftCount == 0;
+    }
 
     private boolean consumePendingDelay()
     {

@@ -868,9 +868,15 @@ public abstract class Instruction
     @Override
     public ResultState executeOperation(final SM sm)
     {
-      return sm.txPull(ifEmpty, block) ?
-        ResultState.STALL :
-        ResultState.COMPLETE;
+        // "When autopull is enabled, the behaviour of 'PULL' is altered: it becomes a no-op if the OSR is full."
+        // Sect. 3.5.4.2. "Autopull Details".
+        final SM.Status smStatus = sm.getStatus();
+    	if (smStatus.regSHIFTCTRL_AUTOPULL && smStatus.isOsrFull())
+    		return ResultState.COMPLETE;
+    	else
+		  return sm.txPull(ifEmpty, block) ?
+		    ResultState.STALL :
+		    ResultState.COMPLETE;
     }
 
     @Override
