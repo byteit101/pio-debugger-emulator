@@ -185,12 +185,24 @@ public class Diagram extends GUIObserver
     final GPIOIOBank0Registers.Regs regGpio0Status =
       GPIOIOBank0Registers.Regs.GPIO0_STATUS;
     for (int gpioNum = 0; gpioNum < 30; gpioNum++) {
-      final String label = "GPIO" + gpioNum + " (out from peri)";
-      final int address =
+      String label = "GPIO" + gpioNum + " (out from peri)";
+      int address =
         GPIOIOBank0Registers.getGPIOAddress(gpioNum, regGpio0Status);
       model.addSignal(this, label + " Value", address, 8, 8).
         setVisible(gpioNum < 2);
       model.addSignal(this, label + " Level", address, 8, null, -1, -1);
+
+      // input
+      label = "GPIO" + gpioNum + " (in from pad)";
+      address = GPIOIOBank0Registers.getGPIOAddress(gpioNum, regGpio0Status);
+      model.addSignal(this, label + " Value", address, 17, 17);
+      model.addSignal(this, label + " Level", address, 17);
+    	      
+
+      label = "GPIO" + gpioNum + " (oe to pad)";
+      address = GPIOIOBank0Registers.getGPIOAddress(gpioNum, regGpio0Status);
+      model.addSignal(this, label + " Value", address, 13,13);
+      model.addSignal(this, label + " Level", address, 13);
     }
     final List<SignalFilter> noDelayFilter =
       ValueFilterPanel.createFilters(true, false);

@@ -29,7 +29,8 @@ public interface Constants
   public static final String PROGRAM_ID = "RP2040 PIO Emulator";
   public static final String VERSION_ID = "0.1";
   public static final String COPYRIGHT_TAG_LINE =
-    String.format("Copyright © 2021 by Jürgen Reuter, Karlsruhe, Germany.%n");
+    String.format("Copyright © 2021 by Jürgen Reuter, Karlsruhe, Germany.%n" + 
+    		"Copyright © 2023 by Patrick Plenefisch.%n");
   public static final String CMD_LINE_COPYRIGHT_NOTICE =
     String.format(COPYRIGHT_TAG_LINE +
                   "%n" +
