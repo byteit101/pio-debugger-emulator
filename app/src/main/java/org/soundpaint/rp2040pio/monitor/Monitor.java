@@ -129,6 +129,11 @@ public class Monitor
       commands = null;
     }
   }
+  
+  public static CommandRegistry getMiniMonitor(final BufferedReader in, SDK sdk)
+  {
+	  return new CommandRegistry(sdk.getConsole(), in, sdk, APP_FULL_NAME);
+  }
 
   private CmdOptions parseArgs(final String argv[]) throws IOException
   {

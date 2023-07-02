@@ -206,7 +206,7 @@ public class Script extends Command
     return 0;
   }
 
-  private boolean executeScript(final LineNumberReader in,
+  public boolean executeScript(final LineNumberReader in,
                                 final String scriptId, final boolean dryRun)
     throws IOException
   {

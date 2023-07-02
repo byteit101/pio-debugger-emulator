@@ -59,6 +59,7 @@ public class MultiGuiObserver extends GUIObserver
   private CodeViewPanel codeViewPanel;
 private GPIOViewPanel gpioViewPanel;
 private FifoViewPanel fifoViewPanel;
+private ScriptLoadController scriptLoad;
 
   private MultiGuiObserver(final PrintStream console, final String[] argv)
     throws IOException
@@ -81,8 +82,12 @@ private FifoViewPanel fifoViewPanel;
 
 		var panel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, fifoViewPanel, gpioViewPanel);
 		
+		scriptLoad = new ScriptLoadController(console, getSDK());
+		
+		var leftpan = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, scriptLoad.getView());
+		
 		codeViewPanel = new CodeViewPanel(console, getSDK(), CodeObserver.APP_TITLE);
-		var panel2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, panel, codeViewPanel);
+		var panel2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftpan, codeViewPanel);
 		
 		return panel2;
   }

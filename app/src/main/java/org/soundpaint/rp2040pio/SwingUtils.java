@@ -30,7 +30,10 @@ import java.io.IOException;
 import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
+
+import li.flor.nativejfilechooser.NativeJFileChooser;
 
 public class SwingUtils
 {
@@ -87,6 +90,12 @@ public class SwingUtils
       new Dimension(Integer.MAX_VALUE, preferredSize.height);
     component.setMaximumSize(maximumSize);
   }
+
+public static JFileChooser makeFileChooser() {
+	if (NativeJFileChooser.FX_AVAILABLE)
+		return new NativeJFileChooser();
+	else return new JFileChooser();
+}
 }
 
 /*
