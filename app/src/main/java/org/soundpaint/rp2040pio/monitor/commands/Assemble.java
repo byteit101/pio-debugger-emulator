@@ -155,15 +155,19 @@ public class Assemble extends Command
 		try(var reader = new FileReader(jsonOutput))
 		{
 			var data = (JSONObject) parser.parse(reader);
+			
+			var all_programs = ((JSONArray)data.get("programs"));
 
-			if (data.size() != 1)
+			if (all_programs.size() != 1)
 			{
 				sdk.getConsole().println("pioasm files must have exactly one program when being loaded. Consider implementing multiple programs in this code.");
 				return false;
 			}
+			// TODO: support multiple programs
 			// load it. { "progr_name":{"instructions:[{"hex": "...."}]}}
-			var program = (JSONObject) data.values().toArray()[0];
-			var program_name = data.keySet().toArray()[0].toString();
+			// load it. {programs: [ { "instructions:[{"hex": "...."}], name: "name"}] }
+			var program = (JSONObject) all_programs.get(0);
+			var program_name = program.get("name").toString();
 			String hex = ((Stream<Object>)((JSONArray)program.get("instructions")).stream()).map(x -> ((JSONObject)x).get("hex").toString()).collect(Collectors.joining("\n"));
 			
 			// TODO: use ProgramParser supported directives?
@@ -174,7 +178,7 @@ public class Assemble extends Command
 			// Use the JSON output to get set/side set options
 			var wrap = new Wrap(sdk.getConsole(), sdk);
 			wrap.setWrap(0, 0, sdk, (int)(long)(Long)program.get("wrap"));
-			wrap.setWrapTarget(0, 0, sdk, (int)(long)(Long)program.get("wrap_target"));
+			wrap.setWrapTarget(0, 0, sdk, (int)(long)(Long)program.get("wrapTarget"));
 			var sideset_obj = (JSONObject)program.get("sideset");
 			var sideset = new SideSet(sdk.getConsole(), sdk);
 			sideset.setSideSetCount(0, 0, sdk, (int)(long)(Long)sideset_obj.get("size"));

@@ -63,7 +63,12 @@ public class ScriptLoadController
     		final LineNumberReader reader =          IOUtils.getReaderForResourcePath(optFileValue);
     	
     		var script = new Script(this.console, Monitor.getMiniMonitor(null, this.sdk));
-			script.executeScript(reader, optFileValue, false);
+			if (!script.executeScript(reader, optFileValue, false))
+			{
+				SwingUtilities.invokeLater(()->{
+					JOptionPane.showMessageDialog(null, "Script loading returned failure, see console for details.");
+				});
+			}
 			
 		} catch (IOException e) {
 			e.printStackTrace();

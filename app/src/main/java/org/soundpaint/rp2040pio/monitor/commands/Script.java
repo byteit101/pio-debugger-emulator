@@ -214,7 +214,7 @@ public class Script extends Command
       executeScript(in, scriptId, dryRun, true, "script> ");
     console.printf("(pio*:sm*) script %s exited with status %d%n",
                    scriptId, exitStatus);
-    return true;
+    return exitStatus == 0;
   }
 
   /**
