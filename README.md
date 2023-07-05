@@ -157,6 +157,10 @@ internal state of the PIO in a graphical and more vivid manner.
  * new `assemble` instruction in the monitor that can replace load+wrap+sideset
  * Monitor CLI now has history & tab completion (jline3/readline-like)
  * GPIO can be toggled from GUI
+ * autopull/autopush can be toggled from GUI
+ * GUI script reloader (partially replaces monitor)
+ * Input and OE in default GPIO signals dialog box
+ * EMU fixes: PULL Is NOP if OSR is full with autopull
 
 <!-- References -->
 
