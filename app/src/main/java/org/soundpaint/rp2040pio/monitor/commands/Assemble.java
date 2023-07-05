@@ -76,6 +76,9 @@ public class Assemble extends Command
   private static final CmdOptions.StringOptionDeclaration optTool =
     CmdOptions.createStringOption("PATH", false, 't', "tool", null,
                                   "path to pioasm tool, if not on PATH");
+  private static final CmdOptions.StringOptionDeclaration optProgram =
+    CmdOptions.createStringOption("NAME", false, 'p', "program", null,
+                                  "name of program to use, if any");
   private static final CmdOptions.BooleanOptionDeclaration optLoad =
     CmdOptions.createBooleanOption(false, 'l', "load", false,
                                   "If the .pioasm file should be loaded");
@@ -86,7 +89,7 @@ public class Assemble extends Command
   {
     super(console, fullName, singleLineDescription, notes,
           new CmdOptions.OptionDeclaration<?>[]
-          { optInput, optOutput, optTool, optLoad });
+          { optInput, optOutput, optTool, optLoad, optProgram });
     if (sdk == null) {
       throw new NullPointerException("sdk");
     }
@@ -157,16 +160,36 @@ public class Assemble extends Command
 			var data = (JSONObject) parser.parse(reader);
 			
 			var all_programs = ((JSONArray)data.get("programs"));
+			
+			String requestedProgram = options.getValue(optProgram);
 
-			if (all_programs.size() != 1)
+			if (all_programs.size() != 1 && requestedProgram == null)
 			{
-				sdk.getConsole().println("pioasm files must have exactly one program when being loaded. Consider implementing multiple programs in this code.");
+				sdk.getConsole().println("pioasm files must have exactly one program when being loaded without -p specified. Please specify -p");
 				return false;
 			}
-			// TODO: support multiple programs
+			int progindex = 0;
+			if (requestedProgram != null)
+			{
+				int i = 0;
+				for (var progr : all_programs)
+				{
+					if (((JSONObject)progr).get("name").toString().equals(requestedProgram))
+					{
+						progindex = i;
+						break;
+					}
+					i++;
+				}
+				if (progindex != i)
+				{
+					sdk.getConsole().println("pio program name not found");
+					return false;
+				}	
+			}
 			// load it. { "progr_name":{"instructions:[{"hex": "...."}]}}
 			// load it. {programs: [ { "instructions:[{"hex": "...."}], name: "name"}] }
-			var program = (JSONObject) all_programs.get(0);
+			var program = (JSONObject) all_programs.get(progindex);
 			var program_name = program.get("name").toString();
 			String hex = ((Stream<Object>)((JSONArray)program.get("instructions")).stream()).map(x -> ((JSONObject)x).get("hex").toString()).collect(Collectors.joining("\n"));
 			
