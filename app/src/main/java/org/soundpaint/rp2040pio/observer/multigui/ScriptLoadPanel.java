@@ -73,8 +73,8 @@ public class ScriptLoadPanel extends JPanel {
 			    var lst = listedItems();
 			    if (!lst.isEmpty())
 			    	fileChooser.setCurrentDirectory(new File(lst.get(0)).getParentFile());
-			    fileChooser.setFileFilter(new FileNameExtensionFilter("Monitor files (.mon)", "*.mon"));
-			    fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Text Files (.txt)", "*.txt"));
+			    fileChooser.setFileFilter(new FileNameExtensionFilter("Monitor files (*.mon)", "mon"));
+			    fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Text Files (*.txt)", "txt"));
 			    if (fileChooser.showOpenDialog(ScriptLoadPanel.this) ==JFileChooser.APPROVE_OPTION)
 			    {
 			    	addSetCombo(fileChooser.getSelectedFile().toString());
