@@ -71,9 +71,6 @@ public class Enter extends Command
     if (sdk == null) {
       throw new NullPointerException("sdk");
     }
-    if (in == null) {
-      throw new NullPointerException("in");
-    }
     this.sdk = sdk;
     this.in = in;
   }
@@ -168,8 +165,11 @@ public class Enter extends Command
       sdk.writeAddress(PIORegisters.getMemoryAddress(pioNum, address),
                        optValueValue);
       unassemble(pioNum, pioSdk, address);
-    } else {
+    } else if (this.in != null) {
       enterWords(pioNum, pioSdk, address);
+    } else {
+      console.printf("error: enter console only supported in command line monitor");
+      return false;
     }
     return true;
   }

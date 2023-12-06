@@ -105,8 +105,7 @@ public class CommandRegistry implements Iterable<Command>
     add(new BreakPoints(console, sdk));
     add(new Clear(console));
     add(new Clock(console, sdk));
-    if (in != null)
-    	add(new Enter(console, sdk, in));
+    add(new Enter(console, sdk, in));
     add(new Execute(console, sdk));
     add(new Fifo(console, sdk));
     add(new Gpio(console, sdk));
