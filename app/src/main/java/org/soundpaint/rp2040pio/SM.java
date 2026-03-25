@@ -1122,7 +1122,7 @@ public class SM implements Constants
                               "before decode");
     }
     status.resultState = instruction.execute(this);
-    if (status.resultState == Instruction.ResultState.COMPLETE) {
+    if (status.resultState == Instruction.ResultState.COMPLETE && !status.isForcedInstruction) {
       /*
        * Sect. 3.4.2.2.: "Delay cycles … take place after … the program
        * counter is updated" (though this specifically refers to JMP
