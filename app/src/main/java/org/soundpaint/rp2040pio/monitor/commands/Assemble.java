@@ -106,6 +106,14 @@ public class Assemble extends Command
 	        throw new CmdOptions.
 	          ParseException("input file \"-i\" must be specified");
 	    }
+      if (options.getValue(optLoad) && options.isDefined(optOutput)) {
+        throw new CmdOptions.
+          ParseException("output file can't be used with +l/--load");
+      }
+      if (!options.getValue(optLoad) && options.isDefined(optProgram)) {
+        throw new CmdOptions.
+          ParseException("program name can only be used with +l/--load");
+      }
     }
   }
 
