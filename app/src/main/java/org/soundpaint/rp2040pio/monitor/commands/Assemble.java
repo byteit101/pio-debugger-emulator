@@ -77,7 +77,7 @@ public class Assemble extends Command
     CmdOptions.createStringOption("PATH", false, 't', "tool", null,
                                   "path to pioasm tool, if not on PATH");
   private static final CmdOptions.StringOptionDeclaration optProgram =
-    CmdOptions.createStringOption("NAME", false, 'p', "program", null,
+    CmdOptions.createStringOption("NAME", false, 'P', "program", null,
                                   "name of program to use, if any");
   private static final CmdOptions.BooleanOptionDeclaration optLoad =
     CmdOptions.createBooleanOption(false, 'l', "load", false,
