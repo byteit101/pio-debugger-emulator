@@ -277,6 +277,11 @@ public abstract class Instruction
       this.address = address;
     }
 
+    public void moveTarget(final int offset)
+    {
+      this.address = (this.address + offset) % 32;
+    }
+
     public int encode(final int pinCtrlSidesetCount,
                       final boolean execCtrlSideEn)
     {
