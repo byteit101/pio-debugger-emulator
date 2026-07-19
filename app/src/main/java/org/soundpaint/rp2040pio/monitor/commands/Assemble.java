@@ -242,6 +242,10 @@ public class Assemble extends Command
 			sideset.setSideSetOpt(pioNum, smNum, sdk, (Boolean)sideset_obj.get("optional"));
 			sideset.setSideSetPinDirs(pioNum, smNum, sdk, (Boolean)sideset_obj.get("pindirs"));
 			
+			// set initial PC address
+			final int address = PIOEmuRegisters.getSMAddress(pioNum, smNum, PIOEmuRegisters.Regs.SM0_PC);
+    		sdk.writeAddress(address, assignedAddress);
+
 			return true;
 		} catch (ParseException e) {
 			e.printStackTrace();
