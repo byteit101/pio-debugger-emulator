@@ -64,8 +64,8 @@ public class Assemble extends Command
     "%n" + 
     "If the \"-l\" load option is given, then after assembly,%n" +
     "it it loaded into pio 0, along with wrap and side set %n"+
-    "commands for sm 0. If you need further control, manually%n" +
-    "load and configure the file, or make a PR with code improvements.";
+    "commands for sm 0. To change the target pio/sm instance,%n" +
+    "use \"-p\" and \"-s\" options.";
 
   private static final CmdOptions.StringOptionDeclaration optInput =
     CmdOptions.createStringOption("PATH", false, 'i', "input", null,
@@ -77,11 +77,17 @@ public class Assemble extends Command
     CmdOptions.createStringOption("PATH", false, 't', "tool", null,
                                   "path to pioasm tool, if not on PATH");
   private static final CmdOptions.StringOptionDeclaration optProgram =
-    CmdOptions.createStringOption("NAME", false, 'p', "program", null,
+    CmdOptions.createStringOption("NAME", false, 'P', "program", null,
                                   "name of program to use, if any");
   private static final CmdOptions.BooleanOptionDeclaration optLoad =
     CmdOptions.createBooleanOption(false, 'l', "load", false,
                                   "If the .pioasm file should be loaded");
+  private static final CmdOptions.IntegerOptionDeclaration optPio =
+    CmdOptions.createIntegerOption("NUMBER", false, 'p', "pio", null,
+                                   "PIO number, either 0 or 1");
+  private static final CmdOptions.IntegerOptionDeclaration optSm =
+    CmdOptions.createIntegerOption("NUMBER", false, 's', "sm", null,
+                                   "SM number, one of 0, 1, 2 or 3");
 
   private final SDK sdk;
 
@@ -89,7 +95,7 @@ public class Assemble extends Command
   {
     super(console, fullName, singleLineDescription, notes,
           new CmdOptions.OptionDeclaration<?>[]
-          { optInput, optOutput, optTool, optLoad, optProgram });
+          { optInput, optOutput, optTool, optLoad, optProgram, optPio, optSm });
     if (sdk == null) {
       throw new NullPointerException("sdk");
     }
@@ -106,6 +112,32 @@ public class Assemble extends Command
 	        throw new CmdOptions.
 	          ParseException("input file \"-i\" must be specified");
 	    }
+      if (options.getValue(optLoad) && options.isDefined(optOutput)) {
+        throw new CmdOptions.
+          ParseException("output file can't be used with +l/--load");
+      }
+      if (!options.getValue(optLoad) && options.isDefined(optProgram)) {
+        throw new CmdOptions.
+          ParseException("program name can only be used with +l/--load");
+      }
+      if (!options.getValue(optLoad) && (options.isDefined(optPio) || options.isDefined(optSm))) {
+        throw new CmdOptions.
+          ParseException("PIO/SM number can only be used with +l/--load");
+      }
+	    if (options.isDefined(optPio)) {
+        final int pioNum = options.getValue(optPio);
+      	if ((pioNum < 0) || (pioNum > Constants.PIO_NUM - 1)) {
+          throw new CmdOptions.
+          	ParseException("PIO number must be either 0 or 1");
+      	}
+	    }
+      if (options.isDefined(optSm)) {
+        final int smNum = options.getValue(optSm);
+        if ((smNum < 0) || (smNum > Constants.SM_COUNT - 1)) {
+          throw new CmdOptions.
+            ParseException("SM number must be one of 0, 1, 2 or 3");
+        }
+      }
     }
   }
 
@@ -154,6 +186,8 @@ public class Assemble extends Command
 		} catch (InterruptedException e) {
 			return false;
 		}
+		final int pioNum = options.isDefined(optPio) ? options.getValue(optPio) : 0;
+		final int smNum = options.isDefined(optSm) ? options.getValue(optSm) : 0;
 	    var parser = new JSONParser();
 		try(var reader = new FileReader(jsonOutput))
 		{
@@ -165,7 +199,7 @@ public class Assemble extends Command
 
 			if (all_programs.size() != 1 && requestedProgram == null)
 			{
-				sdk.getConsole().println("pioasm files must have exactly one program when being loaded without -p specified. Please specify -p");
+				sdk.getConsole().println("pioasm files must have exactly one program when being loaded without -P specified. Please specify -P");
 				return false;
 			}
 			int progindex = 0;
@@ -195,19 +229,23 @@ public class Assemble extends Command
 			
 			// TODO: use ProgramParser supported directives?
 			hex = "#.program " + program_name + "\n\n" + hex;
-			if (!new Load(sdk.getConsole(), sdk).loadHexDump(0, new LineNumberReader(new StringReader(hex)), program_name, null))
-				return false;
+			var lineReader = new LineNumberReader(new StringReader(hex));
+			var assignedAddress = new Load(sdk.getConsole(), sdk).loadHexDump(pioNum, lineReader, program_name, null);
 			// code loaded, now 			
 			// Use the JSON output to get set/side set options
 			var wrap = new Wrap(sdk.getConsole(), sdk);
-			wrap.setWrap(0, 0, sdk, (int)(long)(Long)program.get("wrap"));
-			wrap.setWrapTarget(0, 0, sdk, (int)(long)(Long)program.get("wrapTarget"));
+			wrap.setWrap(pioNum, smNum, sdk, assignedAddress + (int)(long)(Long)program.get("wrap"));
+			wrap.setWrapTarget(pioNum, smNum, sdk, assignedAddress + (int)(long)(Long)program.get("wrapTarget"));
 			var sideset_obj = (JSONObject)program.get("sideset");
 			var sideset = new SideSet(sdk.getConsole(), sdk);
-			sideset.setSideSetCount(0, 0, sdk, (int)(long)(Long)sideset_obj.get("size"));
-			sideset.setSideSetOpt(0, 0, sdk, (Boolean)sideset_obj.get("optional"));
-			sideset.setSideSetPinDirs(0, 0, sdk, (Boolean)sideset_obj.get("pindirs"));
+			sideset.setSideSetCount(pioNum, smNum, sdk, (int)(long)(Long)sideset_obj.get("size"));
+			sideset.setSideSetOpt(pioNum, smNum, sdk, (Boolean)sideset_obj.get("optional"));
+			sideset.setSideSetPinDirs(pioNum, smNum, sdk, (Boolean)sideset_obj.get("pindirs"));
 			
+			// set initial PC address
+			final int address = PIOEmuRegisters.getSMAddress(pioNum, smNum, PIOEmuRegisters.Regs.SM0_PC);
+    		sdk.writeAddress(address, assignedAddress);
+
 			return true;
 		} catch (ParseException e) {
 			e.printStackTrace();

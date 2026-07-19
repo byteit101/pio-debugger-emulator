@@ -530,11 +530,25 @@ public class PIOSDK implements Constants
     final int length = program.getLength();
     synchronized(memory) {
       for (int index = 0; index < length; index++) {
-        final short instruction = program.getInstruction(index);
+        short instruction = program.getInstruction(index);
         final int memoryAddress = (addressOffset + index) & 0x1f;
-        // TODO: FIXME: Code relocation: When (addressOffset != 0),
-        // JMP commands need their absolute target address to be
-        // adjusted according to the offset.
+
+        // Code relocation: When (addressOffset != 0), JMP commands need
+        // their absolute target address to be adjusted according to the offset.
+        Instruction insn;
+        try {
+          // Hardcode delay/side-set configuration, since for this purpose
+          // it only matters to use the same for decoding and encoding.
+          insn =
+            decoder.decode(instruction, 0, false);
+        } catch (final Decoder.DecodeException e) {
+          insn = null;
+        }
+        if (insn instanceof Instruction.Jmp) {
+          ((Instruction.Jmp)insn).moveTarget(addressOffset);
+          instruction = (short)((Instruction.Jmp)insn).encode(0, false);
+        }
+
         memory.writeAddress(PIORegisters.
                             getMemoryAddress(pioNum, memoryAddress),
                             instruction);

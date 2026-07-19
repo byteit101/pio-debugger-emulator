@@ -146,7 +146,7 @@ public class Load extends Command
     }
   }
 
-  boolean loadHexDump(final int pioNum,
+  int loadHexDump(final int pioNum,
                               final BufferedReader reader,
                               final String hexDumpId,
                               final Integer address)
@@ -159,7 +159,7 @@ public class Load extends Command
       pioSdk.addProgram(hexDumpId, reader);
     console.printf("(pio%d:sm*) loaded program %s at address 0x%02x%n",
                    pioNum, hexDumpId, assignedAddress);
-    return true;
+    return assignedAddress;
   }
 
   /**
@@ -185,11 +185,13 @@ public class Load extends Command
         String.format("/examples/%s.hex", optExampleValue);
       final LineNumberReader reader =
         IOUtils.getReaderForResourcePath(resourcePath);
-      return loadHexDump(pioNum, reader, optExampleValue, optAddressValue);
+      loadHexDump(pioNum, reader, optExampleValue, optAddressValue);
+      return true;
     } else if (optFileValue != null) {
       final LineNumberReader reader =
         IOUtils.getReaderForResourcePath(optFileValue);
-      return loadHexDump(pioNum, reader, optFileValue, optAddressValue);
+      loadHexDump(pioNum, reader, optFileValue, optAddressValue);
+      return true;
     }
     return false;
   }
